@@ -13,7 +13,6 @@ var createTask = function(taskText, taskDate, taskList) {
   // append span and p element to parent li
   taskLi.append(taskSpan, taskP);
 
-
   // append to ul list on the page
   $("#list-" + taskList).append(taskLi);
 };
@@ -45,8 +44,73 @@ var saveTasks = function() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 };
 
+// make a sortable list
+$(".card .list-group").sortable({
+  connectWith: $(".card .list-group"),
+  scroll: false,
+  tolerance: "pointer",
+  helper: "clone",
+  activate: function(event, ui) {
+    console.log(ui);
+  },
+  deactivate: function(event, ui) {
+    console.log(ui);
+  }, 
+  over: function(event) {
+    console.log(event);
+  },
+  out: function(event) {
+    console.log(event);
+  },
+  update: function() {
+    //array to store the task data in 
+    var tempArr = [];
+    // loop over current set of children in sortable list 
+    $(this)
+    .children()
+    .each(function(){
+      // Save values in temp array
+      // add task data to temp array as an object
+       tempArr.push({
+        text: $(this)
+        .find("p")
+        .text()
+        .trim(),
+        date: $(this)
+        .find("span")
+        .text()
+        .trim()
+      });     
+    });
 
+  // trim down list's ID to match object property
+  var arrName = $(this)
+  .attr("id")
+  .replace("list-", "");
 
+  // update array on tasks object and save
+  tasks[arrName] = tempArr;
+  saveTasks();
+  },
+  stop:function(event) {
+    $(this).removeClass("dropover");
+  }
+});
+// trash icon can be dropped onto
+$("#trash").droppable({
+  accept: ".card .list-group-item",
+  tolerance: "touch",
+  drop: function(event, ui) {
+    // remove dragged element from the dom 
+    ui.draggable.remove();
+  },
+  over: function(event, ui) {
+    console.log(ui);
+  },
+  out: function(event, ui) {
+    console.log(ui);
+  }
+});
 
 // modal was triggered
 $("#task-form-modal").on("show.bs.modal", function() {
